@@ -13,6 +13,7 @@ def main(in_file, out_file):
     for cell in content['cells']:
         if cell['cell_type'] != 'code': continue
         if cell['source'] == []: continue
+        # {in}
         if not re.match(r'^# *?\{in\}$', cell['source'][0].strip()): continue
         del cell['source'][0]
         if not cell['source'][-1].endswith('\n'): cell['source'][-1] += '\n'
@@ -25,16 +26,22 @@ def main(in_file, out_file):
             # 判断一行只有一个变量（即只包含一个变量名，且没有等号等赋值操作）
             if re.match(r'^\s*\w+\s*$', line): continue
             
-            # 缩进
+            # {indent_num}
             match = re.match(r'^#\s*\{indent_(\d+)\}\s*$', line)
             if match:
                 indent_num = int(match.group(1))
                 continue
             
-            # hide
+            # {hide_cnt}
             match = re.match(r'^#\s*\{hide_(\d+)\}\s*$', line)
             if match:
-                hide_cnt = int(match.group(1))
+                hide_cnt += int(match.group(1))
+                continue
+            
+            # {show_cnt}
+            match = re.match(r'^#\s*\{show_(\d+)\}\s*$', line)
+            if match:
+                show_cnt += int(match.group(1))
                 continue
 
             # {replace_show_hide}
