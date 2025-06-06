@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nbpy"
+version = "0.1.0"
+description = "A tool to process notebook cells and output to a file"
+authors = [
+    { name="Your Name", email="your@email.com" }
+]
+
+[project.scripts]
+nbpy = "nbpy:cli"
