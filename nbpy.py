@@ -26,6 +26,18 @@ def main(in_file, out_file):
             # 判断一行只有一个变量（即只包含一个变量名，且没有等号等赋值操作）
             if re.match(r'^\s*\w+\s*$', line): continue
             
+            # {indent_start}
+            match = re.match(r'^#\s*\{indent_start\}\s*$', line)
+            if match:
+                indent_num += 1
+                continue
+            
+            # {indent_end}
+            match = re.match(r'^#\s*\{indent_end\}\s*$', line)
+            if match:
+                indent_num -= 1
+                continue
+
             # {indent_num}
             match = re.match(r'^#\s*\{indent_(\d+)\}\s*$', line)
             if match:

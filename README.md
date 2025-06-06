@@ -14,6 +14,13 @@ Global Indent: Add indent to all subsequent output lines by cnt levels (each lev
 # {indent_{cnt}}
 ```
 
+Start a code block that requires indentation.
+```
+# {indent_start}
+and
+# {indent_end}
+```
+
 Uncomment the next cnt commented lines
 ```
 # {show_{cnt}}
