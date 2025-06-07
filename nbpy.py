@@ -45,19 +45,19 @@ def main(in_file, out_file):
                 continue
             
             # {hide_cnt}
-            match = re.match(r'^#\s*\{hide_(\d+)\}\s*$', line)
+            match = re.match(r'^\s*#\s*\{hide_(\d+)\}\s*$', line)
             if match:
                 hide_cnt += int(match.group(1))
                 continue
             
             # {show_cnt}
-            match = re.match(r'^#\s*\{show_(\d+)\}\s*$', line)
+            match = re.match(r'^\s*#\s*\{show_(\d+)\}\s*$', line)
             if match:
                 show_cnt += int(match.group(1))
                 continue
 
             # {replace_show_hide}
-            replace_match = re.match(r'^#\s*\{replace_(\d+)_(\d+)\}\s*$', line)
+            replace_match = re.match(r'^\s*#\s*\{replace_(\d+)_(\d+)\}\s*$', line)
             if replace_match:
                 show_cnt = int(replace_match.group(1))
                 hide_cnt = int(replace_match.group(2))
