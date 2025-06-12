@@ -1,13 +1,19 @@
 import json
 import re
+from .macro import Rules
 
-def main(in_file, out_file):
+def main(in_file, out_file, args):
+    line_rules = Rules(args)
     with open(in_file, 'r') as f:
         content = json.load(f)
 
-    indent_num = 0
-    hide_cnt = 0
-    show_cnt = 0
+    arg_dict = {
+        'indent_num': 0,
+        'hide_cnt': 0,
+        'show_cnt': 0,
+        'other_file': None,
+    }
+    
 
     output = []
     for cell in content['cells']:
@@ -26,52 +32,22 @@ def main(in_file, out_file):
             # 判断一行只有一个变量（即只包含一个变量名，且没有等号等赋值操作）
             if re.match(r'^\s*\w+\s*$', line): continue
             
-            # {indent_start}
-            match = re.match(r'^#\s*\{indent_start\}\s*$', line)
-            if match:
-                indent_num += 1
-                continue
-            
-            # {indent_end}
-            match = re.match(r'^#\s*\{indent_end\}\s*$', line)
-            if match:
-                indent_num -= 1
+            skip = line_rules(arg_dict, line)
+            if skip: continue
+
+            if arg_dict['other_file']:
+                with open(arg_dict['other_file'], 'a') as f:
+                    f.write(line)
                 continue
 
-            # {indent_num}
-            match = re.match(r'^#\s*\{indent_(\d+)\}\s*$', line)
-            if match:
-                indent_num = int(match.group(1))
-                continue
-            
-            # {hide_cnt}
-            match = re.match(r'^\s*#\s*\{hide_(\d+)\}\s*$', line)
-            if match:
-                hide_cnt += int(match.group(1))
-                continue
-            
-            # {show_cnt}
-            match = re.match(r'^\s*#\s*\{show_(\d+)\}\s*$', line)
-            if match:
-                show_cnt += int(match.group(1))
-                continue
-
-            # {replace_show_hide}
-            replace_match = re.match(r'^\s*#\s*\{replace_(\d+)_(\d+)\}\s*$', line)
-            if replace_match:
-                show_cnt = int(replace_match.group(1))
-                hide_cnt = int(replace_match.group(2))
-                # 你可以在这里使用 num1 和 num2
-                continue
-
-            if line.startswith('#') and show_cnt:
+            if line.startswith('#') and arg_dict['show_cnt']:
                 line = line[1:].strip() + '\n'
-                show_cnt -= 1
-            elif not line.startswith('#') and hide_cnt:
+                arg_dict['show_cnt'] -= 1
+            elif not line.startswith('#') and arg_dict['hide_cnt']:
                 line = '# ' + line
-                hide_cnt -= 1
+                arg_dict['hide_cnt'] -= 1
 
-            line = '    ' * indent_num + line
+            line = '    ' * arg_dict['indent_num'] + line
             
             cell_content.append(line)
         cell_content.append('\n')
@@ -88,6 +64,7 @@ def cli():
     parser.add_argument('-o', '--output', type=str, default='default.py', help='Output file path relative to current file')
     args = parser.parse_args()
 
+
     # 检查输入文件是否存在且为.ipynb文件
     if not os.path.isfile(args.in_file):
         print(f"输入文件不存在: {args.in_file}")
@@ -96,10 +73,7 @@ def cli():
         print(f"输入文件不是.ipynb文件: {args.in_file}")
         exit()
     # 获取in_file的目录
-    in_file_dir = os.path.dirname(os.path.abspath(args.in_file))
+    args.in_file_dir = os.path.dirname(os.path.abspath(args.in_file))
     in_file_name = os.path.splitext(os.path.basename(args.in_file))[0]
-    out_file = os.path.join(in_file_dir, f"{in_file_name}.py")
-    main(in_file=args.in_file, out_file=out_file)
-
-if __name__ == '__main__':
-    cli()
+    out_file = os.path.join(args.in_file_dir, f"{in_file_name}.py")
+    main(in_file=args.in_file, out_file=out_file, args=args)

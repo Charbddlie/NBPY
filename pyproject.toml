@@ -7,7 +7,7 @@ name = "nbpy"
 version = "0.1.0"
 description = "A tool to process notebook cells and output to a file"
 authors = [
-    { name="Your Name", email="your@email.com" }
+    { name="Xu Jingwen", email="threadcup@gmail.com" }
 ]
 
 [project.scripts]
