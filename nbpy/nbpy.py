@@ -56,7 +56,7 @@ def main(in_file, out_file, args):
                 # 检查是否已存在该import语句
                 if line not in existing:
                     # 在第一行插入import语句
-                    existing = [line] + existing
+                    existing = [line.strip()+'\n'] + existing
                     with open(out_file, 'w') as f:
                         f.writelines(existing)
                 continue
@@ -65,7 +65,7 @@ def main(in_file, out_file, args):
             line = '    ' * arg_dict['indent_num'] + line
             with open(out_file, 'a') as f:
                 f.write(line)
-                
+
         with open(out_file, 'a') as f:
             f.write('\n')
 
