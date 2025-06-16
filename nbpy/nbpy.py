@@ -6,6 +6,8 @@ def main(in_file, out_file, args):
     line_rules = Rules(args)
     with open(in_file, 'r') as f:
         content = json.load(f)
+    with open(out_file, 'w') as f:
+        pass
 
     arg_dict = {
         'indent_num': 0,
@@ -14,8 +16,6 @@ def main(in_file, out_file, args):
         'other_file': None,
     }
     
-
-    output = []
     for cell in content['cells']:
         if cell['cell_type'] != 'code': continue
         if cell['source'] == []: continue
@@ -23,15 +23,13 @@ def main(in_file, out_file, args):
         if not re.match(r'^# *?\{in\}$', cell['source'][0].strip()): continue
         del cell['source'][0]
         if not cell['source'][-1].endswith('\n'): cell['source'][-1] += '\n'
-        cell_content = []
-        
         
         # 删除line的内容是一个python变量的line
         for line in cell['source']:
             line = line.rstrip() + '\n'
             # 判断一行只有一个变量（即只包含一个变量名，且没有等号等赋值操作）
             if re.match(r'^\s*\w+\s*$', line): continue
-            
+
             skip = line_rules(arg_dict, line)
             if skip: continue
 
@@ -47,14 +45,29 @@ def main(in_file, out_file, args):
                 line = '# ' + line
                 arg_dict['hide_cnt'] -= 1
 
-            line = '    ' * arg_dict['indent_num'] + line
-            
-            cell_content.append(line)
-        cell_content.append('\n')
-        output += cell_content
+            # 判断一行是否是import，如果是就写入out_file第一行
+            if re.match(r'^\s*(from\s+[\w\.]+\s+import\s+[\w\*]+|import\s+[\w\.\*]+)', line):
+                # 读取当前out_file内容
+                try:
+                    with open(out_file, 'r') as f:
+                        existing = f.readlines()
+                except FileNotFoundError:
+                    existing = []
+                # 检查是否已存在该import语句
+                if line not in existing:
+                    # 在第一行插入import语句
+                    existing = [line] + existing
+                    with open(out_file, 'w') as f:
+                        f.writelines(existing)
+                continue
 
-    with open(out_file, 'w') as f:
-        f.writelines(output)
+
+            line = '    ' * arg_dict['indent_num'] + line
+            with open(out_file, 'a') as f:
+                f.write(line)
+                
+        with open(out_file, 'a') as f:
+            f.write('\n')
 
 import argparse
 import os
