@@ -2,6 +2,12 @@ import json
 import re
 from .macro import Rules
 
+python_instr_set = {
+    "return",
+    "pass",
+    "continu",
+    "break",
+}
 def main(in_file, out_file, args):
     line_rules = Rules(args)
     with open(in_file, 'r') as f:
@@ -28,7 +34,7 @@ def main(in_file, out_file, args):
         for line in cell['source']:
             line = line.rstrip() + '\n'
             # 判断一行只有一个变量（即只包含一个变量名，且没有等号等赋值操作）
-            if re.match(r'^\s*\w+\s*$', line): continue
+            if re.match(r'^\s*\w+\s*$', line) and line.strip() not in python_instr_set: continue
 
             skip = line_rules(arg_dict, line)
             if skip: continue
