@@ -36,6 +36,13 @@ Replace the next show_cnt lines with hide_cnt lines
 # {replace_{show_cnt}_{hide_cnt}}
 ```
 
+Output content to another file
+```
+# {other_file_start_{file_name}}
+and
+# {other_file_end}
+```
+
 ## Magic
 You can use the above instructions to accomplish the following tasks.
 
